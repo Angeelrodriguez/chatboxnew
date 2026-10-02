@@ -1,51 +1,65 @@
-/* 
- * script fot chat page controler
+/*
+ * Script controlador de la página de chat
  */
 import { Mensaje } from './Mensaje.js';
-//**array de mensajes*/
-var mensajes=new Array();
+
+/** Array de mensajes */
+const mensajes = [];
+
 /**
- * esta funcion muestra todos los mensajes del paramentro
- * en una página en forma de texto dentro de un Contenedor DIV
- * @param {type} mensajes La coleccion de mensajes a mostrar
- * @returns {undefined} Undefined
+ * Muestra todos los mensajes de la colección dentro de la lista #msgList,
+ * cada uno en un elemento <li>.
+ * @returns {undefined}
  */
 function actualizarMensajes() {
-    //Ordenar mensajes pr fecha de mensaje de
-    //de mas reciente a más antiguo
     const listMsgs = document.getElementById("msgList");
+
+    // Vaciar la lista antes de volver a pintarla
     while (listMsgs.firstChild) {
         listMsgs.removeChild(listMsgs.firstChild);
     }
-    //Recorrer la coleccion de mensajes
-    for(let msg=0; msg < mensajes.length; msg++){
+
+    // Recorrer la colección de mensajes y añadir un <li> por cada uno
+    for (let msg = 0; msg < mensajes.length; msg++) {
         const newLi = document.createElement("li");
-        const newContent = document.createTextNode(mensajes[msg].texto);
+        const newContent = document.createTextNode(mensajes[msg].text);
         newLi.appendChild(newContent);
-        listMsgs.insertBefore(newLi, null);
+        listMsgs.appendChild(newLi);
     }
-        //En cada iteración añidimos al elemento <DIV> continido
-        //consitente en el texto del mensaje, dentro de un elemnto <LI>
 }
+
 /**
- * Esta es la funcion que recoge el mensaje que quiere enviar el usuario
- * y lo envia a la lista de mensajes
+ * Recoge el mensaje que quiere enviar el usuario y lo añade a la lista.
+ * @param {Event} event El evento click o submit
  * @returns {undefined}
  */
-function enviarMensaje() {
-    //Obtenemos el mensaje
-    let textoMensaje=document.getElementById('msgText').value;
-    //Lo metemos en la coleccion de mensajes
-    mensajes.push(new Mensaje (textoMensaje, new Date()));
-    document.getElementById("msgText").value="";
-    document.getElementById("msgText").focus();
+function enviarMensaje(event) {
+    // Evita que el formulario se envíe y recargue la página
+    if (event) {
+        event.preventDefault();
+    }
+
+    const campoTexto = document.getElementById('msgText');
+    const textoMensaje = campoTexto.value.trim();
+    if (textoMensaje === "") {
+        return;
+    }
+
+    mensajes.push(new Mensaje(textoMensaje, new Date()));
+    campoTexto.value = "";
+    campoTexto.focus();
     actualizarMensajes();
-    
 }
-//Asocio la funciom actualizarMensaje como manejadora del evento de carga del 
-//DOM de la pagina
-document.addEventListener('DOMContentLoaded',actualizarMensajes(mensajes));
-//Asocio la funcion enviarMensaje como manejadora del evento click del
-//elemento sendButton
+
+// Pinta la lista (vacía) al cargar la página
+actualizarMensajes();
+
+// Asocio enviarMensaje al click del botón
 document.getElementById('sendButton').addEventListener('click', enviarMensaje);
+
+// Por si acaso el formulario llega a enviarse (p. ej. con Enter), lo bloqueo
+const chatForm = document.getElementById('chatForm');
+if (chatForm) {
+    chatForm.addEventListener('submit', enviarMensaje);
+}
 
